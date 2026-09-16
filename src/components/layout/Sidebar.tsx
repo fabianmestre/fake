@@ -7,6 +7,7 @@ import {
   IconChevronLeft,
   IconFlag,
   IconHandshake,
+  IconKey,
   IconListCheck,
   IconMegaphone,
   IconPencilPlus,
@@ -139,6 +140,11 @@ export function Sidebar({ colapsado, onToggle }: SidebarProps) {
             <NavLink to="/dia-e" className={({ isActive }) => `${itemBase} ${isActive ? itemActivo : itemInactivo}`}>
               <IconFlag className="h-5 w-5 shrink-0" />
               {!colapsado && <span>Día-E</span>}
+            </NavLink>
+
+            <NavLink to="/credenciales" className={({ isActive }) => `${itemBase} ${isActive ? itemActivo : itemInactivo}`}>
+              <IconKey className="h-5 w-5 shrink-0" />
+              {!colapsado && <span>Credenciales</span>}
             </NavLink>
           </>
         )}

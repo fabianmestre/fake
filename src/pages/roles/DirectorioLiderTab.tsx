@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Persona } from '../../types';
 import { useDataStore } from '../../state/dataStore';
+import { useUsuariosStore } from '../../state/usuariosStore';
 import { nombreCompleto, siguientePlanilla } from '../../data/generarDatos';
 import { DirectorioSimpatizantes } from '../../components/simpatizantes/DirectorioSimpatizantes';
 
@@ -104,6 +105,8 @@ function AsignarPadrinoModal({
 export function DirectorioLiderTab() {
   const personas = useDataStore((s) => s.personas);
   const actualizarPersona = useDataStore((s) => s.actualizarPersona);
+  const crearOReactivarUsuario = useUsuariosStore((s) => s.crearOReactivarUsuario);
+  const desactivarPorPersona = useUsuariosStore((s) => s.desactivarPorPersona);
   const [promoviendo, setPromoviendo] = useState<Persona | null>(null);
   const [mensaje, setMensaje] = useState<{ texto: string; tipo: 'exito' | 'error' } | null>(null);
 
@@ -125,7 +128,10 @@ export function DirectorioLiderTab() {
   function confirmarPromocion(padrinoId: string, meta: number) {
     if (!promoviendo) return;
     actualizarPersona(promoviendo.id, { rol: 'Líder', padrinoId, planilla: siguientePlanilla(personas), metaSimpatizantes: meta });
-    mostrarMensaje(`${nombreCompleto(promoviendo)} fue promovido a Líder, con una meta de ${meta} simpatizantes válidos.`);
+    const cuenta = crearOReactivarUsuario(promoviendo, 'lider');
+    mostrarMensaje(
+      `${nombreCompleto(promoviendo)} fue promovido a Líder, con una meta de ${meta} simpatizantes válidos. Usuario de acceso: ${cuenta.usuario} (ver contraseña en Credenciales).`,
+    );
     setPromoviendo(null);
   }
 
@@ -143,7 +149,8 @@ export function DirectorioLiderTab() {
     }
     if (!confirm(`¿Quitarle el rol de Líder a ${nombreCompleto(lider)}? Volverá a ser Simpatizante bajo ${nombreCompleto(liderHistorico)}.`)) return;
     actualizarPersona(lider.id, { rol: 'Simpatizante', padrinoId: undefined, planilla: liderHistorico.planilla });
-    mostrarMensaje(`${nombreCompleto(lider)} volvió a ser Simpatizante.`);
+    desactivarPorPersona(lider.id);
+    mostrarMensaje(`${nombreCompleto(lider)} volvió a ser Simpatizante. Se desactivó su acceso a la plataforma.`);
   }
 
   return (

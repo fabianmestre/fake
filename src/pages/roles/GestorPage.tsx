@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Persona } from '../../types';
 import { useSessionStore } from '../../state/sessionStore';
 import { useDataStore } from '../../state/dataStore';
+import { useUsuariosStore } from '../../state/usuariosStore';
 import { nombreCompleto } from '../../data/generarDatos';
 import { DirectorioSimpatizantes } from '../../components/simpatizantes/DirectorioSimpatizantes';
 
@@ -84,6 +85,8 @@ function AsignarLideresModal({
 export function GestorPage() {
   const usuario = useSessionStore((s) => s.usuario);
   const actualizarPersona = useDataStore((s) => s.actualizarPersona);
+  const crearOReactivarUsuario = useUsuariosStore((s) => s.crearOReactivarUsuario);
+  const desactivarPorPersona = useUsuariosStore((s) => s.desactivarPorPersona);
   const [promoviendo, setPromoviendo] = useState<Persona | null>(null);
   const [editandoLideres, setEditandoLideres] = useState<Persona | null>(null);
   const [mensaje, setMensaje] = useState<{ texto: string; tipo: 'exito' | 'error' } | null>(null);
@@ -98,7 +101,10 @@ export function GestorPage() {
   function confirmarPromocion(liderIds: string[]) {
     if (!promoviendo) return;
     actualizarPersona(promoviendo.id, { rol: 'Gestor', liderIds });
-    mostrarMensaje(`${nombreCompleto(promoviendo)} fue promovido a Gestor, a cargo de ${liderIds.length} líder(es).`);
+    const cuenta = crearOReactivarUsuario(promoviendo, 'gestor');
+    mostrarMensaje(
+      `${nombreCompleto(promoviendo)} fue promovido a Gestor, a cargo de ${liderIds.length} líder(es). Usuario de acceso: ${cuenta.usuario} (ver contraseña en Credenciales).`,
+    );
     setPromoviendo(null);
   }
 
@@ -112,7 +118,8 @@ export function GestorPage() {
   function quitarRol(gestor: Persona) {
     if (!confirm(`¿Quitarle el rol de Gestor a ${nombreCompleto(gestor)}? Volverá a ser Simpatizante.`)) return;
     actualizarPersona(gestor.id, { rol: 'Simpatizante', liderIds: undefined, liderId: undefined });
-    mostrarMensaje(`${nombreCompleto(gestor)} volvió a ser Simpatizante.`);
+    desactivarPorPersona(gestor.id);
+    mostrarMensaje(`${nombreCompleto(gestor)} volvió a ser Simpatizante. Se desactivó su acceso a la plataforma.`);
   }
 
   return (

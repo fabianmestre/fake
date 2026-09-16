@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Persona } from '../../types';
 import { useSessionStore } from '../../state/sessionStore';
 import { useDataStore } from '../../state/dataStore';
+import { useUsuariosStore } from '../../state/usuariosStore';
 import { nombreCompleto } from '../../data/generarDatos';
 import { DirectorioSimpatizantes } from '../../components/simpatizantes/DirectorioSimpatizantes';
 
@@ -9,6 +10,8 @@ export function DigitadorPage() {
   const usuario = useSessionStore((s) => s.usuario);
   const personas = useDataStore((s) => s.personas);
   const actualizarPersona = useDataStore((s) => s.actualizarPersona);
+  const crearOReactivarUsuario = useUsuariosStore((s) => s.crearOReactivarUsuario);
+  const desactivarPorPersona = useUsuariosStore((s) => s.desactivarPorPersona);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
   const esAdmin = usuario?.rolUsuario === 'admin';
@@ -24,13 +27,15 @@ export function DigitadorPage() {
 
   function promover(p: Persona) {
     actualizarPersona(p.id, { rol: 'Digitador' });
-    mostrarMensaje(`${nombreCompleto(p)} fue promovido a Digitador.`);
+    const cuenta = crearOReactivarUsuario(p, 'digitador');
+    mostrarMensaje(`${nombreCompleto(p)} fue promovido a Digitador. Usuario de acceso: ${cuenta.usuario} (ver contraseña en Credenciales).`);
   }
 
   function quitarRol(p: Persona) {
     if (!confirm(`¿Quitarle el rol de Digitador a ${nombreCompleto(p)}? Volverá a ser Simpatizante.`)) return;
     actualizarPersona(p.id, { rol: 'Simpatizante' });
-    mostrarMensaje(`${nombreCompleto(p)} volvió a ser Simpatizante.`);
+    desactivarPorPersona(p.id);
+    mostrarMensaje(`${nombreCompleto(p)} volvió a ser Simpatizante. Se desactivó su acceso a la plataforma.`);
   }
 
   return (

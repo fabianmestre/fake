@@ -138,4 +138,6 @@ export interface UsuarioPrueba {
   clave: string;
   rolUsuario: RolUsuario;
   personaId?: string; // ficha de Persona asociada (todos menos admin)
+  activo: boolean; // acceso habilitado/deshabilitado a la plataforma
+  fechaCreacion: string; // YYYY-MM-DD
 }

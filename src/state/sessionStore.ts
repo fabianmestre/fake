@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { UsuarioPrueba } from '../types';
-import { USUARIOS_PRUEBA, CLAVE_DEMO } from '../data/usuariosPrueba';
+import { CLAVE_DEMO } from '../data/usuariosPrueba';
+import { useUsuariosStore } from './usuariosStore';
 
 interface SessionState {
   usuario: UsuarioPrueba | null;
@@ -10,16 +11,17 @@ interface SessionState {
   cambiarClave: (claveActual: string, claveNueva: string) => { ok: boolean; mensaje: string };
 }
 
-const claves = new Map<string, string>(USUARIOS_PRUEBA.map((u) => [u.id, u.clave]));
-
 export const useSessionStore = create<SessionState>((set, get) => ({
   usuario: null,
   error: null,
   login: (usuario, clave) => {
-    const encontrado = USUARIOS_PRUEBA.find((u) => u.usuario === usuario.trim().toLowerCase());
-    const claveValida = encontrado ? claves.get(encontrado.id) === clave : false;
-    if (!encontrado || !claveValida) {
+    const encontrado = useUsuariosStore.getState().usuarios.find((u) => u.usuario === usuario.trim().toLowerCase());
+    if (!encontrado || encontrado.clave !== clave) {
       set({ error: 'Usuario o contraseña incorrectos.' });
+      return false;
+    }
+    if (!encontrado.activo) {
+      set({ error: 'Este usuario no tiene acceso activo a la plataforma. Contacta al administrador.' });
       return false;
     }
     set({ usuario: encontrado, error: null });
@@ -29,13 +31,14 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   cambiarClave: (claveActual, claveNueva) => {
     const usuario = get().usuario;
     if (!usuario) return { ok: false, mensaje: 'No hay sesión activa.' };
-    if (claves.get(usuario.id) !== claveActual) {
+    const cuenta = useUsuariosStore.getState().usuarios.find((u) => u.id === usuario.id);
+    if (!cuenta || cuenta.clave !== claveActual) {
       return { ok: false, mensaje: 'La contraseña actual no coincide.' };
     }
     if (claveNueva.length < 4) {
       return { ok: false, mensaje: 'La nueva contraseña debe tener al menos 4 caracteres.' };
     }
-    claves.set(usuario.id, claveNueva);
+    useUsuariosStore.getState().actualizarClave(usuario.id, claveNueva);
     return { ok: true, mensaje: 'Contraseña actualizada correctamente.' };
   },
 }));

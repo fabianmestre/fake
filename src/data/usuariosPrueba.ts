@@ -7,6 +7,8 @@ const digitadorDemo = PERSONAS.find((p) => p.rol === 'Digitador')!;
 
 export const CLAVE_DEMO = '1234';
 
+const FECHA_SEED = '2026-01-15';
+
 export const USUARIOS_PRUEBA: UsuarioPrueba[] = [
   {
     id: 'u-admin',
@@ -14,6 +16,8 @@ export const USUARIOS_PRUEBA: UsuarioPrueba[] = [
     usuario: 'admin',
     clave: CLAVE_DEMO,
     rolUsuario: 'admin',
+    activo: true,
+    fechaCreacion: FECHA_SEED,
   },
   {
     id: 'u-lider',
@@ -22,6 +26,8 @@ export const USUARIOS_PRUEBA: UsuarioPrueba[] = [
     clave: CLAVE_DEMO,
     rolUsuario: 'lider',
     personaId: liderDemo.id,
+    activo: true,
+    fechaCreacion: FECHA_SEED,
   },
   {
     id: 'u-gestor',
@@ -30,6 +36,8 @@ export const USUARIOS_PRUEBA: UsuarioPrueba[] = [
     clave: CLAVE_DEMO,
     rolUsuario: 'gestor',
     personaId: gestorDemo.id,
+    activo: true,
+    fechaCreacion: FECHA_SEED,
   },
   {
     id: 'u-digitador',
@@ -38,5 +46,7 @@ export const USUARIOS_PRUEBA: UsuarioPrueba[] = [
     clave: CLAVE_DEMO,
     rolUsuario: 'digitador',
     personaId: digitadorDemo.id,
+    activo: true,
+    fechaCreacion: FECHA_SEED,
   },
 ];

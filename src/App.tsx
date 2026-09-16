@@ -21,6 +21,7 @@ import { DirectorioSimpatizanteTab } from './pages/roles/DirectorioSimpatizanteT
 import { ComunicacionesPage } from './pages/ComunicacionesPage';
 import { GestionesPage } from './pages/GestionesPage';
 import { DiaEPage } from './pages/DiaEPage';
+import { CredencialesPage } from './pages/CredencialesPage';
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           <Route path="/gestiones" element={<GestionesPage />} />
           <Route path="/comunicaciones" element={<ComunicacionesPage />} />
           <Route path="/dia-e" element={<DiaEPage />} />
+          <Route path="/credenciales" element={<CredencialesPage />} />
           <Route path="/mapa-talento" element={<PaginaProximamente titulo="Mapa de Talento" descripcion="Se detallará próximamente." />} />
         </Route>
 
