@@ -18,6 +18,9 @@ import { PadrinoPage } from './pages/roles/PadrinoPage';
 import { GestorPage } from './pages/roles/GestorPage';
 import { DashboardSimpatizante } from './components/simpatizantes/DashboardSimpatizante';
 import { DirectorioSimpatizanteTab } from './pages/roles/DirectorioSimpatizanteTab';
+import { ComunicacionesPage } from './pages/ComunicacionesPage';
+import { GestionesPage } from './pages/GestionesPage';
+import { DiaEPage } from './pages/DiaEPage';
 
 function App() {
   return (
@@ -50,9 +53,9 @@ function App() {
           <Route path="/roles/gestor" element={<GestorPage />} />
           <Route path="/roles/digitador" element={<DigitadorPage />} />
 
-          <Route path="/gestiones" element={<PaginaProximamente titulo="Gestiones" descripcion="Trazabilidad de favores, compromisos y balance — se detallará próximamente." />} />
-          <Route path="/comunicaciones" element={<PaginaProximamente titulo="Comunicaciones" descripcion="Envíos masivos segmentados — se detallará próximamente." />} />
-          <Route path="/dia-e" element={<PaginaProximamente titulo="Día-E" descripcion="Centro de mando: votos, líderes, transporte y censo — se detallará próximamente." />} />
+          <Route path="/gestiones" element={<GestionesPage />} />
+          <Route path="/comunicaciones" element={<ComunicacionesPage />} />
+          <Route path="/dia-e" element={<DiaEPage />} />
           <Route path="/mapa-talento" element={<PaginaProximamente titulo="Mapa de Talento" descripcion="Se detallará próximamente." />} />
         </Route>
 

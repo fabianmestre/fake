@@ -208,3 +208,19 @@ export function puestosDeComuna(comuna: string): PuestoVotacion[] {
   const propios = PUESTOS_VALLEDUPAR.filter((p) => p.comunas?.includes(comuna));
   return propios.length ? propios : PUESTOS_VALLEDUPAR;
 }
+
+/** Departamentos donde hay al menos un puesto de votación registrado (para filtros por Dpto-Votación). */
+export function listaDepartamentosVotacion(): string[] {
+  return Array.from(new Set(PUESTOS_VOTACION.map((p) => p.departamento))).sort();
+}
+
+/** Municipios con puesto de votación; si se pasa un departamento, solo los de ese departamento. */
+export function listaMunicipiosVotacion(departamento?: string): string[] {
+  const universo = departamento ? PUESTOS_VOTACION.filter((p) => p.departamento === departamento) : PUESTOS_VOTACION;
+  return Array.from(new Set(universo.map((p) => p.municipio))).sort();
+}
+
+/** Puestos que corresponden a un Dpto-Votación/Munic-Votación (cualquiera de los dos, o ambos, opcional). */
+export function puestosDeDeptoMunic(departamento?: string, municipio?: string): PuestoVotacion[] {
+  return PUESTOS_VOTACION.filter((p) => (!departamento || p.departamento === departamento) && (!municipio || p.municipio === municipio));
+}

@@ -8,7 +8,6 @@ import {
   IconFlag,
   IconHandshake,
   IconListCheck,
-  IconMap,
   IconMegaphone,
   IconPencilPlus,
   IconShield,
@@ -140,11 +139,6 @@ export function Sidebar({ colapsado, onToggle }: SidebarProps) {
             <NavLink to="/dia-e" className={({ isActive }) => `${itemBase} ${isActive ? itemActivo : itemInactivo}`}>
               <IconFlag className="h-5 w-5 shrink-0" />
               {!colapsado && <span>Día-E</span>}
-            </NavLink>
-
-            <NavLink to="/mapa-talento" className={({ isActive }) => `${itemBase} ${isActive ? itemActivo : itemInactivo}`}>
-              <IconMap className="h-5 w-5 shrink-0" />
-              {!colapsado && <span>Mapa de Talento</span>}
             </NavLink>
           </>
         )}

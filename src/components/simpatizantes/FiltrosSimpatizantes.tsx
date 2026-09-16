@@ -1,5 +1,5 @@
 import { listaMunicipios, comunasPorTipo, barriosDeComuna } from '../../data/geografia';
-import { PUESTOS_VOTACION } from '../../data/puestosVotacion';
+import { listaDepartamentosVotacion, listaMunicipiosVotacion, puestosDeDeptoMunic } from '../../data/puestosVotacion';
 import { nombreCompleto } from '../../data/generarDatos';
 import {
   GRUPOS_SOCIALES,
@@ -21,6 +21,8 @@ export interface FiltrosState {
   comuna: string;
   corregimiento: string;
   barrio: string;
+  dptoVotacion: string;
+  municVotacion: string;
   puestoVotacionId: string;
   mesaVotacion: string;
   nivel: string;
@@ -46,6 +48,8 @@ export const FILTROS_VACIOS: FiltrosState = {
   comuna: '',
   corregimiento: '',
   barrio: '',
+  dptoVotacion: '',
+  municVotacion: '',
   puestoVotacionId: '',
   mesaVotacion: '',
   nivel: '',
@@ -154,6 +158,13 @@ export function FiltrosSimpatizantes({
       next.comuna = '';
       next.barrio = '';
     }
+    if (campo === 'dptoVotacion') {
+      next.municVotacion = '';
+      next.puestoVotacionId = '';
+    }
+    if (campo === 'municVotacion') {
+      next.puestoVotacionId = '';
+    }
     onChange(next);
   };
 
@@ -161,6 +172,9 @@ export function FiltrosSimpatizantes({
   const corregimientos = filtros.municipio ? comunasPorTipo(filtros.municipio, 'Corregimiento').map((c) => c.nombre) : [];
   const comunaOBarrio = filtros.comuna || filtros.corregimiento;
   const barrios = filtros.municipio && comunaOBarrio ? barriosDeComuna(filtros.municipio, comunaOBarrio) : [];
+
+  const municipiosVotacion = listaMunicipiosVotacion(filtros.dptoVotacion || undefined);
+  const puestosFiltrados = puestosDeDeptoMunic(filtros.dptoVotacion || undefined, filtros.municVotacion || undefined);
 
   return (
     <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
@@ -180,10 +194,22 @@ export function FiltrosSimpatizantes({
 
       <SeccionFiltros titulo="Puesto de Votación">
         <Select
+          label="Departamento (votación)"
+          value={filtros.dptoVotacion}
+          onChange={(v) => set('dptoVotacion', v)}
+          opciones={listaDepartamentosVotacion()}
+        />
+        <Select
+          label="Municipio (votación)"
+          value={filtros.municVotacion}
+          onChange={(v) => set('municVotacion', v)}
+          opciones={municipiosVotacion}
+        />
+        <Select
           label="Puesto de votación"
           value={filtros.puestoVotacionId}
           onChange={(v) => set('puestoVotacionId', v)}
-          opciones={PUESTOS_VOTACION.map((p) => ({ value: p.id, label: `${p.nombre} (${p.municipio})` }))}
+          opciones={puestosFiltrados.map((p) => ({ value: p.id, label: `${p.nombre} (${p.municipio})` }))}
         />
         <CampoTexto label="Mesa" value={filtros.mesaVotacion} onChange={(v) => set('mesaVotacion', v)} placeholder="Ej: 101" />
       </SeccionFiltros>

@@ -10,6 +10,23 @@ export type RolDiaE = 'Votante' | 'Testigo Electoral' | 'Transportador' | 'Logí
 
 export type VehiculoTipo = 'Moto' | 'Carro' | 'Bus/Buseta';
 
+export type CategoriaGestion = 'Salud' | 'Empleo' | 'Ayudas/Mercados' | 'Recursos/Dinero' | 'Trámites/Asesoría' | 'Obras comunitarias';
+
+export type EstadoGestion = 'Pendiente' | 'En Proceso' | 'Resuelto';
+
+// Un favor/compromiso que el candidato o su equipo le gestiona a alguien (o a la comunidad en
+// general, si personaId queda vacío) — la trazabilidad de "lo que se debe" y "lo que ya se cumplió".
+export interface Gestion {
+  id: string;
+  personaId?: string; // simpatizante o líder beneficiado; vacío = gestión general de campaña
+  fecha: string; // YYYY-MM-DD
+  categoria: CategoriaGestion;
+  descripcion: string;
+  monto?: number; // COP; algunas categorías (trámites, obras) no siempre implican dinero
+  estado: EstadoGestion;
+  responsable: string; // texto libre: quién de la campaña la está gestionando
+}
+
 // Un vehículo aquí implica que el simpatizante lo puso a disposición de la campaña
 // (transporte de votantes, logística del Día E) — una persona puede ofrecer varios (ej. moto y carro).
 export interface VehiculoCampania {

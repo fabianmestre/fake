@@ -13,7 +13,7 @@ import { Pagination } from '../common/Pagination';
 const TAMANO_PAGINA = 20;
 const COLUMNAS_KEY = 'directorio-simpatizantes-columnas';
 
-function coincide(p: Persona, filtros: FiltrosState, busqueda: string) {
+export function coincide(p: Persona, filtros: FiltrosState, busqueda: string) {
   if (filtros.municipio && p.municipio !== filtros.municipio) return false;
   if (filtros.comuna && p.comuna !== filtros.comuna) return false;
   if (filtros.corregimiento && p.comuna !== filtros.corregimiento) return false;
@@ -30,6 +30,8 @@ function coincide(p: Persona, filtros: FiltrosState, busqueda: string) {
   if (filtros.rol && p.rol !== filtros.rol) return false;
   if (filtros.validez && p.validez !== filtros.validez) return false;
   if (filtros.nivel && p.nivel !== filtros.nivel) return false;
+  if (filtros.dptoVotacion && p.dptoVotacion !== filtros.dptoVotacion) return false;
+  if (filtros.municVotacion && p.municVotacion !== filtros.municVotacion) return false;
   if (filtros.puestoVotacionId && p.puestoVotacionId !== filtros.puestoVotacionId) return false;
   if (filtros.mesaVotacion && p.mesaVotacion !== filtros.mesaVotacion.trim()) return false;
   if (filtros.tieneVehiculo && (p.vehiculoDisponible ? 'Sí' : 'No') !== filtros.tieneVehiculo) return false;
