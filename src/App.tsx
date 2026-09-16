@@ -17,7 +17,7 @@ import { DigitadorPage } from './pages/roles/DigitadorPage';
 import { PadrinoPage } from './pages/roles/PadrinoPage';
 import { GestorPage } from './pages/roles/GestorPage';
 import { DashboardSimpatizante } from './components/simpatizantes/DashboardSimpatizante';
-import { DirectorioSimpatizantes } from './components/simpatizantes/DirectorioSimpatizantes';
+import { DirectorioSimpatizanteTab } from './pages/roles/DirectorioSimpatizanteTab';
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
         }
       >
         <Route element={<RestringirPorRol />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/roles/simpatizante" replace />} />
           <Route path="/dashboard" element={<DashboardGlobalPage />} />
 
           <Route path="/roles" element={<Navigate to="/roles/simpatizante" replace />} />
@@ -45,7 +45,7 @@ function App() {
           <Route path="/roles/simpatizante" element={<SimpatizantePage />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardSimpatizante />} />
-            <Route path="directorio" element={<DirectorioSimpatizantes />} />
+            <Route path="directorio" element={<DirectorioSimpatizanteTab />} />
           </Route>
           <Route path="/roles/gestor" element={<GestorPage />} />
           <Route path="/roles/digitador" element={<DigitadorPage />} />

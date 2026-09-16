@@ -505,6 +505,20 @@ export function NuevoSimpatizanteModal({ onClose, personaExistente, lideres, onG
                     </p>
                   )}
                 </Campo>
+                {form.rol === 'Líder' && (
+                  <Campo label="Meta de simpatizantes válidos" requerido>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      required
+                      disabled={bloqueado('metaSimpatizantes')}
+                      className={inputCls}
+                      value={form.metaSimpatizantes ?? ''}
+                      onChange={(e) => set('metaSimpatizantes', e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                  </Campo>
+                )}
               </div>
             </section>
 

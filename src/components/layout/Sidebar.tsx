@@ -6,7 +6,6 @@ import {
   IconChevronDown,
   IconChevronLeft,
   IconFlag,
-  IconGrid,
   IconHandshake,
   IconListCheck,
   IconMap,
@@ -95,11 +94,6 @@ export function Sidebar({ colapsado, onToggle }: SidebarProps) {
           </NavLink>
         ) : (
           <>
-            <NavLink to="/dashboard" className={({ isActive }) => `${itemBase} ${isActive ? itemActivo : itemInactivo}`}>
-              <IconGrid className="h-5 w-5 shrink-0" />
-              {!colapsado && <span>Dashboard</span>}
-            </NavLink>
-
             <div>
               <button
                 type="button"

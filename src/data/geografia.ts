@@ -132,3 +132,12 @@ export function zonaDeComuna(municipio: string, comuna: string): Zona | undefine
 export function comunasPorTipo(municipio: string, tipo: 'Comuna' | 'Corregimiento') {
   return comunasDeMunicipio(municipio).filter((c) => c.tipo === tipo);
 }
+
+/**
+ * Localidad "mostrable" de una persona: su barrio real si vive en una comuna urbana, o el nombre
+ * del corregimiento si vive en zona rural (un corregimiento no es un barrio — mostrar su pseudo-
+ * barrio "X Centro" como si fuera uno confunde la lectura de comunas/corregimientos vs. barrios).
+ */
+export function localidadDeResidencia(p: { municipio: string; comuna: string; barrio: string }): string {
+  return zonaDeComuna(p.municipio, p.comuna) === 'Rural' ? p.comuna : p.barrio;
+}

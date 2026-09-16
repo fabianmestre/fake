@@ -45,6 +45,10 @@ export interface PuestoVotacion {
   departamento: string;
   municipio: string;
   mesas: Mesa[];
+  // Comunas/corregimientos de Valledupar a los que corresponde este puesto (solo aplica a
+  // puestos dentro de Valledupar) — se usa para asignarle a cada persona un puesto acorde a
+  // dónde vive, en vez de uno aleatorio sin relación con su residencia.
+  comunas?: string[];
 }
 
 export interface Persona {

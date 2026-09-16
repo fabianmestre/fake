@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Persona } from '../../types';
 import { useDataStore } from '../../state/dataStore';
-import { META_DEFECTO_LIDER, nombreCompleto, siguientePlanilla } from '../../data/generarDatos';
+import { nombreCompleto, siguientePlanilla } from '../../data/generarDatos';
 import { DirectorioSimpatizantes } from '../../components/simpatizantes/DirectorioSimpatizantes';
 
 interface FiltroNavegacion {
@@ -10,9 +10,18 @@ interface FiltroNavegacion {
   motivo?: string;
 }
 
-function AsignarPadrinoModal({ persona, onClose, onConfirmar }: { persona: Persona; onClose: () => void; onConfirmar: (padrinoId: string) => void }) {
+function AsignarPadrinoModal({
+  persona,
+  onClose,
+  onConfirmar,
+}: {
+  persona: Persona;
+  onClose: () => void;
+  onConfirmar: (padrinoId: string, meta: number) => void;
+}) {
   const personas = useDataStore((s) => s.personas);
   const [padrinoId, setPadrinoId] = useState('');
+  const [meta, setMeta] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const candidato = useMemo(() => personas.find((p) => p.rol === 'Candidato'), [personas]);
@@ -24,7 +33,12 @@ function AsignarPadrinoModal({ persona, onClose, onConfirmar }: { persona: Perso
       setError('Selecciona a quién va a reportar (un Padrino o el Candidato).');
       return;
     }
-    onConfirmar(padrinoId);
+    const metaNumerica = Number(meta);
+    if (!meta || !Number.isInteger(metaNumerica) || metaNumerica <= 0) {
+      setError('Digita la meta de simpatizantes válidos que le exiges a este líder (un número mayor a 0).');
+      return;
+    }
+    onConfirmar(padrinoId, metaNumerica);
   }
 
   return (
@@ -56,6 +70,21 @@ function AsignarPadrinoModal({ persona, onClose, onConfirmar }: { persona: Perso
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">Meta de simpatizantes válidos</label>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={meta}
+              onChange={(e) => setMeta(e.target.value)}
+              placeholder="Ej. 20"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+            />
+            <p className="mt-1 text-[11px] text-gray-400">
+              La define el Candidato o el Padrino para cada líder — no hay un valor por defecto, cada quien tiene la suya.
+            </p>
           </div>
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
@@ -93,10 +122,10 @@ export function DirectorioLiderTab() {
     window.setTimeout(() => setMensaje(null), 5000);
   }
 
-  function confirmarPromocion(padrinoId: string) {
+  function confirmarPromocion(padrinoId: string, meta: number) {
     if (!promoviendo) return;
-    actualizarPersona(promoviendo.id, { rol: 'Líder', padrinoId, planilla: siguientePlanilla(personas), metaSimpatizantes: META_DEFECTO_LIDER });
-    mostrarMensaje(`${nombreCompleto(promoviendo)} fue promovido a Líder.`);
+    actualizarPersona(promoviendo.id, { rol: 'Líder', padrinoId, planilla: siguientePlanilla(personas), metaSimpatizantes: meta });
+    mostrarMensaje(`${nombreCompleto(promoviendo)} fue promovido a Líder, con una meta de ${meta} simpatizantes válidos.`);
     setPromoviendo(null);
   }
 

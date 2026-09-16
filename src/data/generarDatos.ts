@@ -1,7 +1,7 @@
 import { fakerES as faker } from '@faker-js/faker';
 import type { NivelFormacion, Persona, VehiculoCampania, VehiculoTipo } from '../types';
 import { CESAR, comunasDeMunicipio, barriosDeComuna } from './geografia';
-import { PUESTOS_VOTACION, PUESTOS_OTRO_DEPARTAMENTO } from './puestosVotacion';
+import { PUESTOS_VOTACION, PUESTOS_OTRO_DEPARTAMENTO, PUESTOS_MUNICIPIO_CERCANO, puestosDeComuna } from './puestosVotacion';
 import { GRUPOS_SOCIALES, GUSTOS_INTERESES, OCUPACIONES, PASAJEROS_FIJOS, POSGRADOS, ROLES_DIA_E, TIPOS_VEHICULO } from './catalogosCaracterizacion';
 
 faker.seed(2026);
@@ -98,10 +98,11 @@ function generarBase(id: string, ctx: ContextoGeneracion): Omit<Persona, 'rol' |
   let puesto: (typeof PUESTOS_VOTACION)[number] | undefined;
   let mesaVotacion: string | undefined;
   if (tieneDatosVotacion) {
-    const dentroCircunscripcion = Math.random() > 0.12; // ~12% registrados fuera de la circunscripción
-    const candidatos = dentroCircunscripcion
-      ? PUESTOS_VOTACION.filter((p) => p.municipio === 'Valledupar')
-      : PUESTOS_VOTACION.filter((p) => p.departamento === 'Cesar' && p.municipio !== 'Valledupar'); // municipios cercanos
+    // Solo un residente de Valledupar puede quedar "dentro" de la circunscripción del Concejo;
+    // quien vive en La Paz/San Diego siempre vota fuera de ella, por definición.
+    const dentroCircunscripcion = municipio === 'Valledupar' && Math.random() > 0.12; // ~12% de Valledupar registrados fuera
+    // El puesto corresponde a la comuna/corregimiento donde vive (no uno cualquiera de Valledupar).
+    const candidatos = dentroCircunscripcion ? puestosDeComuna(comuna) : PUESTOS_MUNICIPIO_CERCANO; // municipios cercanos
     puesto = pick(candidatos.length ? candidatos : PUESTOS_VOTACION);
     mesaVotacion = pick(puesto.mesas).numero;
   }
@@ -112,6 +113,8 @@ function generarBase(id: string, ctx: ContextoGeneracion): Omit<Persona, 'rol' |
 
   const vehiculoDisponible = Math.random() > 0.85; // ~15% pone al menos un vehículo a disposición de la campaña
   const vehiculos: VehiculoCampania[] = vehiculoDisponible ? generarVehiculosCampania(id) : [];
+
+  const tieneTelefono = Math.random() > 0.06; // ~6% sin teléfono registrado (dato incompleto)
 
   const fechaRegistro = faker.date.between({ from: '2026-01-15', to: '2026-09-10' }).toISOString().slice(0, 10);
   const validez: Persona['validez'] = puesto && puesto.municipio === 'Valledupar' ? 'Válido' : 'Inválido';
@@ -124,7 +127,7 @@ function generarBase(id: string, ctx: ContextoGeneracion): Omit<Persona, 'rol' |
     nombres,
     apellidos,
     cedula: generarCedula(ctx.cedulas),
-    telefono: generarTelefono(),
+    telefono: tieneTelefono ? generarTelefono() : '',
     correo: faker.internet.email({ firstName: nombres, lastName: apellidos.split(' ')[0] }).toLowerCase(),
     departamento: CESAR.nombre,
     municipio,
@@ -268,7 +271,6 @@ function construirDataset(): Persona[] {
     { indice: 1, votos: 65 },
     { indice: 2, votos: 100 },
   ];
-  const puestosValledupar = PUESTOS_VOTACION.filter((p) => p.municipio === 'Valledupar');
   const simpatizantesEjemplo: Persona[] = [];
   LIDERES_EJEMPLO_VOTOS.forEach(({ indice, votos }) => {
     const lider = lideres[indice];
@@ -277,9 +279,19 @@ function construirDataset(): Persona[] {
     ).length;
     const faltantes = Math.max(0, votos - validosActuales);
     for (let i = 0; i < faltantes; i++) {
-      const puesto = pick(puestosValledupar);
+      const base = generarBase(nextId(), ctx);
+      // Esta cohorte existe para llegar a un número exacto de VÁLIDOS de Valledupar, así que su
+      // residencia se fuerza a Valledupar (si generarBase la mandó a La Paz/San Diego, no tendría
+      // sentido darle luego un puesto de votación de Valledupar).
+      if (base.municipio !== 'Valledupar') {
+        base.municipio = 'Valledupar';
+        base.comuna = pick(comunasDeMunicipio('Valledupar')).nombre;
+        base.barrio = pick(barriosDeComuna('Valledupar', base.comuna));
+      }
+      // El puesto corresponde a la comuna/corregimiento donde vive esta persona de ejemplo.
+      const puesto = pick(puestosDeComuna(base.comuna));
       simpatizantesEjemplo.push({
-        ...generarBase(nextId(), ctx),
+        ...base,
         rol: 'Simpatizante',
         liderId: lider.id,
         planilla: lider.planilla,
@@ -295,7 +307,45 @@ function construirDataset(): Persona[] {
     }
   });
 
-  const simpatizantes: Persona[] = [...simpatizantesBase, ...simpatizantesOtroDepartamento, ...simpatizantesEjemplo];
+  // 5d. Concentración telefónica sospechosa — algunos líderes reciclan el mismo número en varios
+  // registros de su equipo (bandera de calidad de dato: números inventados o copiados al afán).
+  const LIDERES_CON_TELEFONO_REPETIDO = faker.helpers.arrayElements(lideres, 5);
+  LIDERES_CON_TELEFONO_REPETIDO.forEach((lider) => {
+    const equipo = simpatizantesBase.filter((s) => s.liderId === lider.id);
+    if (equipo.length < 3) return;
+    const numeroCompartido = generarTelefono();
+    faker.helpers.arrayElements(equipo, Math.min(3, equipo.length)).forEach((s) => {
+      s.telefono = numeroCompartido;
+    });
+  });
+
+  // 5e. Duplicados de cédula ("paternidad" en disputa) — el mismo simpatizante capturado dos veces
+  // por líderes distintos en fechas distintas; alimentan la Mesa de Control de Auditoría del
+  // dashboard (auditoría de a cuál líder le corresponde el registro).
+  const CANTIDAD_DUPLICADOS = 18;
+  const simpatizantesDuplicados: Persona[] = faker.helpers.arrayElements(simpatizantesBase, CANTIDAD_DUPLICADOS).map((original) => {
+    const otroLider = pick(lideres.filter((l) => l.id !== original.liderId));
+    const diasDespues = faker.number.int({ min: 3, max: 60 });
+    const fechaDuplicado = new Date(original.fechaRegistro);
+    fechaDuplicado.setDate(fechaDuplicado.getDate() + diasDespues);
+    const fechaTope = new Date('2026-09-10');
+    const fechaFinal = fechaDuplicado > fechaTope ? fechaTope : fechaDuplicado;
+    return {
+      ...original,
+      id: nextId(),
+      liderId: otroLider.id,
+      planilla: otroLider.planilla,
+      registradoPor: Math.random() < 0.25 ? 'admin' : pick(digitadores).id,
+      fechaRegistro: fechaFinal.toISOString().slice(0, 10),
+    };
+  });
+
+  const simpatizantes: Persona[] = [
+    ...simpatizantesBase,
+    ...simpatizantesOtroDepartamento,
+    ...simpatizantesEjemplo,
+    ...simpatizantesDuplicados,
+  ];
 
   // Meta de simpatizantes válidos por líder — algunos la superan, otros se quedan cortos (a propósito).
   lideres.forEach((lider) => {
@@ -340,6 +390,3 @@ export function siguientePlanilla(personas: Persona[]): string {
   const siguiente = (numeros.length ? Math.max(...numeros) : 0) + 1;
   return `PL-${String(siguiente).padStart(5, '0')}`;
 }
-
-/** Meta inicial de simpatizantes válidos para un líder recién promovido. */
-export const META_DEFECTO_LIDER = 20;

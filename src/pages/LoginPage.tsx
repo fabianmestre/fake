@@ -14,7 +14,7 @@ export function LoginPage() {
   function entrar(e?: React.FormEvent) {
     e?.preventDefault();
     if (login(usuario, clave)) {
-      navigate('/dashboard');
+      navigate('/roles/simpatizante');
     }
   }
 
@@ -22,7 +22,7 @@ export function LoginPage() {
     setUsuario(u);
     setClave(CLAVE_DEMO);
     if (login(u, CLAVE_DEMO)) {
-      navigate('/dashboard');
+      navigate('/roles/simpatizante');
     }
   }
 
